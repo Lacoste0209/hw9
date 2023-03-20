@@ -1,0 +1,36 @@
+package test;
+
+import com.codeborne.selenide.Condition;
+import data.DataGenerator;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
+import static com.codeborne.selenide.Selenide.*;
+
+public class DeliveryTest extends SetUp {
+
+    @Test
+    @DisplayName("Should successful plan and replan meeting")
+    void shouldSuccessfulPlanAndReplanMeeting() {
+        var deleteText = Keys.chord(Keys.CONTROL + "A", Keys.BACK_SPACE);
+        var validCity = DataGenerator.generateCity("ru");
+        var validName = DataGenerator.generateName("ru");
+        var validPhone = DataGenerator.generatePhone("ru");
+        var firstMeetingDate = DataGenerator.generateDate(4);
+        var secondMeetingDate = DataGenerator.generateDate(7);
+        $("[data-test-id='city'] input").setValue(validCity);
+        $("[data-test-id='date'] input").sendKeys(deleteText);
+        $("[data-test-id='date'] input").setValue(firstMeetingDate);
+        $("[data-test-id='name'] input").setValue(validName);
+        $("[data-test-id='phone'] input").setValue(validPhone);
+        $x("//span[@class='checkbox__box']").click();
+        $x("//span[@class='button__text']").click();
+        $x("//div[@data-test-id='success-notification']//div[@class='notification__content']").shouldBe(Condition.appear, Condition.exactText("Встреча успешно запланирована на " + firstMeetingDate));
+        $("[data-test-id='date'] input").sendKeys(deleteText);
+        $("[data-test-id='date'] input").setValue(secondMeetingDate);
+        $x("//span[@class='button__text']").click();
+        $x("//div[@data-test-id='replan-notification']//div[@class='notification__content']").shouldBe(Condition.appear, Condition.text("У вас уже запланирована встреча на другую дату. Перепланировать?"));
+        $x("//div[@class='notification__content']//span[@class='button__text']").click();
+        $x("//div[@data-test-id='success-notification']//div[@class='notification__content']").shouldBe(Condition.appear, Condition.exactText("Встреча успешно запланирована на " + secondMeetingDate));
+    }
+}
